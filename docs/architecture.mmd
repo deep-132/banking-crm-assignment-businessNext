@@ -1,0 +1,31 @@
+flowchart TD
+    RM["RM (React + TS + Tailwind chat UI)"] -->|"POST /api/chat {session_id, message}"| API[FastAPI]
+    API --> Graph["LangGraph agent"]
+
+    subgraph Graph["LangGraph agent (backend/app/agent)"]
+        SUP["Supervisor / Router node\n(Azure OpenAI, JSON intent)"]
+        RETRIEVE["retrieve_and_score node\n(get_customers, compute_hvc_score,\nestimate_conversion_probability,\ncheck_eligibility_and_recommend)"]
+        RANK["rank_and_select node\n(reuses cached all_scored_records)"]
+        GEN["generate_messages node\n(Azure OpenAI, fact-grounded)"]
+        COMPOSE["compose_response node"]
+        EXPLAIN["explain node\n(reads cached scored_records)"]
+        CLARIFY["clarify node"]
+
+        SUP -->|full_search| RETRIEVE --> RANK
+        SUP -->|refine| RANK
+        RANK --> GEN --> COMPOSE
+        SUP -->|explain| EXPLAIN
+        SUP -->|clarify| CLARIFY
+    end
+
+    RETRIEVE -->|SQL + pandas| DB[("SQLite: customers, accounts,\ntransactions, products_held,\nloan_offers, interactions")]
+    GEN -->|chat_completion| AOAI[("Azure OpenAI\nchat deployment")]
+    SUP -->|chat_completion| AOAI
+
+    COMPOSE --> API
+    EXPLAIN --> API
+    CLARIFY --> API
+    API -->|"{reply_text, customers[], action}"| RM
+
+    STATE[("Session store\n(in-memory dict,\nkeyed by session_id)")]
+    API <-.persist/reuse AgentState.-> STATE
