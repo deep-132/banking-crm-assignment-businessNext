@@ -108,7 +108,6 @@ def _top_conversion_signal(breakdown: dict) -> str | None:
 
 def compose_response_node(state: AgentState) -> AgentState:
     top_customers = state.get("top_customers", [])
-    messages = state.get("generated_messages", {})
 
     if not top_customers:
         state["reply_text"] = (
@@ -117,21 +116,16 @@ def compose_response_node(state: AgentState) -> AgentState:
         )
         return state
 
-    lines = [
+    product_label = state["intent"]["product_type"].replace("_", " ")
+    top = top_customers[0]
+    avg_conversion = sum(c["conversion_score"] for c in top_customers) / len(top_customers)
+
+    state["reply_text"] = (
         f"Found {len(top_customers)} customers ranked by value + conversion likelihood for "
-        f"{state['intent']['product_type'].replace('_', ' ')}:",
-        "",
-    ]
-    for c in top_customers:
-        msg = messages.get(c["customer_id"], {}).get("message", "")
-        lines.append(
-            f"- {c['name']} ({c['customer_id']}, {c['city']}, {c['segment']}) — "
-            f"HVC {c['hvc_score']}, conversion {c['conversion_score']}%, "
-            f"recommend {c['recommended_product']} (Rs. {c['recommended_amount']:,.0f})"
-        )
-        if msg:
-            lines.append(f"  WhatsApp draft: \"{msg}\"")
-    state["reply_text"] = "\n".join(lines)
+        f"{product_label} (avg conversion score {avg_conversion:.0f}%). Top match: {top['name']} "
+        f"({top['customer_id']}) — HVC {top['hvc_score']}, conversion {top['conversion_score']}%. "
+        f"Full breakdown and WhatsApp drafts are below."
+    )
     return state
 
 

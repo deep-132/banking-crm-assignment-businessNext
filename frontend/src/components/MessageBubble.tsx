@@ -1,3 +1,4 @@
+import { Bot, User } from 'lucide-react'
 import type { ChatMessage } from '../types/chat'
 import { CustomerCard } from './CustomerCard'
 
@@ -11,13 +12,23 @@ export function MessageBubble({ message, onExplain, explainingId }: Props) {
   const isRm = message.role === 'rm'
 
   return (
-    <div className={`flex ${isRm ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[85%] ${isRm ? 'items-end' : 'items-start'} flex flex-col gap-2`}>
+    <div className={`flex items-start gap-2.5 ${isRm ? 'flex-row-reverse' : ''}`}>
+      <div
+        className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+          isRm
+            ? 'bg-indigo-600 text-white'
+            : 'bg-linear-to-br from-emerald-500 to-teal-600 text-white'
+        }`}
+      >
+        {isRm ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
+      </div>
+
+      <div className={`flex max-w-[85%] flex-col gap-2 ${isRm ? 'items-end' : 'items-start'}`}>
         <div
-          className={`whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+          className={`whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
             isRm
-              ? 'bg-indigo-600 text-white'
-              : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100'
+              ? 'rounded-tr-sm bg-indigo-600 text-white'
+              : 'rounded-tl-sm bg-white text-slate-800 dark:bg-slate-800 dark:text-slate-100'
           }`}
         >
           {message.content}
