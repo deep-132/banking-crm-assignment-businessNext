@@ -66,5 +66,19 @@ to write outreach copy (`tools/messaging.py`), and never to invent a score or a 
 ## Specs
 
 Acceptance criteria for the core use cases are in [specs/personal-loan-outreach.feature](specs/personal-loan-outreach.feature),
-written Given/When/Then. They map directly onto `backend/tests/test_agent_graph.py` — if you
-change routing or ranking behavior, update both.
+written in Gherkin (Given/When/Then). This is an **executable spec**, not just documentation:
+`backend/tests/step_defs/test_personal_loan_outreach_steps.py` uses `pytest-bdd` to bind each
+line to real code, so `pytest` runs the `.feature` file directly against the compiled LangGraph
+agent (with only the Azure OpenAI call mocked — retrieval, scoring, ranking, and eligibility all
+run for real against the seeded SQLite DB).
+
+Five scenarios are currently wired: the full_search happy path, refine, explain (happy path and
+the no-prior-search guardrail), and the ambiguous-request clarify path. Two scenarios in the
+`.feature` file — "No customer qualifies" and "Generated outreach never invents facts" — are
+intentionally left as documentation-only for now; wire them with the same `@scenario` /
+`@given`/`@when`/`@then` pattern when they matter enough to enforce automatically.
+
+**The actual spec-driven loop for adding a feature**: write the new scenario in the `.feature`
+file first, run `pytest` and watch it fail (no step definitions / no behavior yet), then write the
+step definitions and implementation until it's green. Spec → red → implement → green, not
+implement-then-document.

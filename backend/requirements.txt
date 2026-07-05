@@ -11,4 +11,5 @@ scikit-learn==1.5.2
 Faker==29.0.0
 python-dotenv==1.0.1
 pytest==8.3.3
+pytest-bdd==8.1.0
 httpx==0.27.2

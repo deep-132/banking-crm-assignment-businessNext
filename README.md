@@ -9,9 +9,11 @@ recommendations and grounded outreach drafts.
 - **Frontend**: React + TypeScript + Tailwind CSS (minimal chat UI)
 
 Built spec-first: the RM use case is written as Given/When/Then acceptance criteria in
-[specs/personal-loan-outreach.feature](specs/personal-loan-outreach.feature) before the
-implementation notes below, and [CLAUDE.md](CLAUDE.md) documents the conventions the codebase
-follows so both humans and coding agents stay consistent with them.
+[specs/personal-loan-outreach.feature](specs/personal-loan-outreach.feature), and it's an
+**executable spec** — `pytest-bdd` binds it to `backend/tests/step_defs/`, so `pytest` runs the
+`.feature` file directly against the real agent graph, not just against hand-written test
+functions. [CLAUDE.md](CLAUDE.md) documents the conventions the codebase follows so both humans
+and coding agents stay consistent with them.
 
 ## 1. Architecture
 
@@ -156,7 +158,7 @@ banking-crm/
       agent/           state.py, prompts.py, supervisor.py, nodes.py, graph.py
       api/             routes_chat.py, session_store.py
       models/          schemas.py
-    tests/           test_tools.py, test_scoring.py, test_agent_graph.py
+    tests/           test_tools.py, test_scoring.py, test_agent_graph.py, step_defs/ (executable spec)
     requirements.txt, .env.example, pytest.ini
   frontend/
     src/
@@ -187,10 +189,12 @@ python -m app.db.seed_data      # seeds ~300 synthetic customers into SQLite
 uvicorn app.main:app --reload   # http://localhost:8000
 ```
 
-Run tests (fully offline — LLM calls are mocked):
+Run tests (fully offline — LLM calls are mocked), including the executable Gherkin spec:
 
 ```bash
 pytest
+# or just the spec:
+pytest tests/step_defs -v
 ```
 
 Optional: train the demo ML conversion model (`SCORING_MODE=ml` in `.env`):
