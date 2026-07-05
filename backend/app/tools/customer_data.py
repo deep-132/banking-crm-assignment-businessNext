@@ -54,9 +54,9 @@ def get_customers(filters: CustomerFilters | None = None) -> pd.DataFrame:
         held = get_products_held(df["customer_id"].tolist())
         held_active = held[held["status"] == "active"]
         excluded_ids = set(
-            held_active[held_active["product_type"].isin(filters.exclude_active_product_types)][
-                "customer_id"
-            ]
+            held_active[
+                held_active["product_type"].isin(filters.exclude_active_product_types)
+            ]["customer_id"]
         )
         df = df[~df["customer_id"].isin(excluded_ids)]
 
@@ -66,7 +66,15 @@ def get_customers(filters: CustomerFilters | None = None) -> pd.DataFrame:
 def get_transactions(customer_ids: list[str], lookback_days: int = 180) -> pd.DataFrame:
     if not customer_ids:
         return pd.DataFrame(
-            columns=["txn_id", "customer_id", "txn_date", "amount", "txn_type", "category", "channel"]
+            columns=[
+                "txn_id",
+                "customer_id",
+                "txn_date",
+                "amount",
+                "txn_type",
+                "category",
+                "channel",
+            ]
         )
     conn = get_connection()
     try:
@@ -88,7 +96,9 @@ def get_transactions(customer_ids: list[str], lookback_days: int = 180) -> pd.Da
 
 def get_products_held(customer_ids: list[str]) -> pd.DataFrame:
     if not customer_ids:
-        return pd.DataFrame(columns=["customer_id", "product_type", "status", "start_date"])
+        return pd.DataFrame(
+            columns=["customer_id", "product_type", "status", "start_date"]
+        )
     conn = get_connection()
     try:
         placeholders = ",".join("?" for _ in customer_ids)
@@ -109,7 +119,14 @@ def get_products_held(customer_ids: list[str]) -> pd.DataFrame:
 def get_interactions(customer_ids: list[str], lookback_days: int = 90) -> pd.DataFrame:
     if not customer_ids:
         return pd.DataFrame(
-            columns=["interaction_id", "customer_id", "channel", "interaction_type", "interaction_date", "notes"]
+            columns=[
+                "interaction_id",
+                "customer_id",
+                "channel",
+                "interaction_type",
+                "interaction_date",
+                "notes",
+            ]
         )
     conn = get_connection()
     try:
@@ -134,7 +151,9 @@ def get_loan_offers(product_type: str | None = None) -> pd.DataFrame:
     try:
         if product_type:
             df = pd.read_sql_query(
-                "SELECT * FROM loan_offers WHERE product_type = ?", conn, params=[product_type]
+                "SELECT * FROM loan_offers WHERE product_type = ?",
+                conn,
+                params=[product_type],
             )
         else:
             df = pd.read_sql_query("SELECT * FROM loan_offers", conn)
