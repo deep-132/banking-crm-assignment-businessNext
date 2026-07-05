@@ -9,11 +9,12 @@ recommendations and grounded outreach drafts.
 - **Frontend**: React + TypeScript + Tailwind CSS (minimal chat UI)
 
 Built spec-first: the RM use case is written as Given/When/Then acceptance criteria in
-[specs/personal-loan-outreach.feature](specs/personal-loan-outreach.feature), and it's an
-**executable spec** — `pytest-bdd` binds it to `backend/tests/step_defs/`, so `pytest` runs the
-`.feature` file directly against the real agent graph, not just against hand-written test
-functions. [CLAUDE.md](CLAUDE.md) documents the conventions the codebase follows so both humans
-and coding agents stay consistent with them.
+[specs/personal-loan-outreach.feature](specs/personal-loan-outreach.feature), and it's a genuinely
+**executable spec**, not just prose — `pytest-bdd` binds 5 of its 7 scenarios to
+`backend/tests/step_defs/`, so `pytest` runs those scenarios directly against the real agent
+graph (only the Azure OpenAI call is mocked). [CLAUDE.md](CLAUDE.md) documents which scenarios are
+wired and the conventions the codebase follows so both humans and coding agents stay consistent
+with them.
 
 ## 1. Architecture
 
@@ -125,6 +126,10 @@ inferred) or refers to a customer not in the current result set, the router retu
   is wrapped: the supervisor falls back to a safe default intent, and message generation falls
   back to a deterministic template — logged loudly as `fallback_template` — so a demo never hard
   crashes on a missing/invalid API key. Real generation always takes precedence when configured.
+- **Executable acceptance criteria.** `specs/personal-loan-outreach.feature` isn't documentation
+  that can drift from the code — `pytest-bdd` step definitions bind 5 of its scenarios to the real
+  agent graph, so a regression in routing or the loan-exclusion rule fails a `pytest` run
+  immediately, with the exact violating customer IDs in the assertion message.
 
 ## 5. Trade-offs & limitations
 
@@ -144,6 +149,9 @@ inferred) or refers to a customer not in the current result set, the router retu
   batching/streaming.
 - **Synthetic data.** All customers/transactions are Faker-generated with deterministic seeding
   (documented signal distributions in `seed_data.py`), not real banking data.
+- **Not every spec scenario is wired to a test yet.** "No customer qualifies" and "Generated
+  outreach never invents facts" are written in the `.feature` file but intentionally left as
+  documentation-only for now — see `CLAUDE.md` for how to wire them the same way as the other 5.
 
 ## 6. Project structure
 
