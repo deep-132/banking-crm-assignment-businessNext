@@ -107,10 +107,17 @@ def check_ranked_list(context):
 
 @then("every returned customer excludes anyone who already holds an active personal loan")
 def check_excludes_existing_loan_holders(context):
-    top_ids = [c["customer_id"] for c in context["result"]["top_customers"]]
-    held = get_products_held(top_ids)
+    # Checked against the full scored universe, not just the displayed top N —
+    # the exclusion happens at retrieval time, so that's where a regression
+    # would actually show up, regardless of which customers happen to rank
+    # highest in a given seeded dataset.
+    all_ids = [c["customer_id"] for c in context["result"]["all_scored_records"]]
+    held = get_products_held(all_ids)
     active_personal_loans = held[(held["status"] == "active") & (held["product_type"] == "personal_loan")]
-    assert active_personal_loans.empty
+    assert active_personal_loans.empty, (
+        f"found active personal-loan holders in the candidate universe: "
+        f"{list(active_personal_loans['customer_id'])}"
+    )
 
 
 @then("every returned customer has a high-value score and a conversion score")
