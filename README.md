@@ -8,6 +8,11 @@ recommendations and grounded outreach drafts.
 - **Backend**: Python, FastAPI, LangGraph, Azure OpenAI, SQLite, pandas
 - **Frontend**: React + TypeScript + Tailwind CSS (minimal chat UI)
 
+Built spec-first: the RM use case is written as Given/When/Then acceptance criteria in
+[specs/personal-loan-outreach.feature](specs/personal-loan-outreach.feature) before the
+implementation notes below, and [CLAUDE.md](CLAUDE.md) documents the conventions the codebase
+follows so both humans and coding agents stay consistent with them.
+
 ## 1. Architecture
 
 ```mermaid
@@ -161,6 +166,8 @@ banking-crm/
       App.tsx
     .env.example
   docs/architecture.mmd
+  specs/personal-loan-outreach.feature
+  CLAUDE.md
 ```
 
 ## 7. Setup & run instructions
